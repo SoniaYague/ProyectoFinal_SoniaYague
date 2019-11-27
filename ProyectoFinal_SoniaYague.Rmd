@@ -1,0 +1,132 @@
+---
+title: "Proyecto final"
+author: "Sonia Yagüe Ruiz-Crespo"
+date: "18/11/2019"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    highlight: kate
+    theme: paper
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# INTRODUCCIÓN
+
+Para este proyecto final se van a desarrollar tres partes:
+
+1. Compararación de los puntos de vista de [rpubs](http://rpubs.com/ydmarinb/429756) y [ub.edu](http://www.ub.edu/stat/docencia/Cursos-R/Radvanced/materials/CadenasenR.pdf) sobre expresiones regulares. 
+1. Comparación de los puntos de vista de [guides.github](https://guides.github.com/features/mastering-markdown/) y [markdownguide](https://www.markdownguide.org/getting-started/) sobre markdown. 
+1. Análisis de datos.
+
+# EXPRESIONES REGULARES
+
+## Página web 1
+
+Las **expresiones regulares**, también conocidas como _regex_, _regexp_ o _expresión racional_, es una secuencia de caracteres que forma un patrón de búsqueda, principalmente utilizada para la búsqueda de patrones de cadenas de caracteres u operaciones de sustituciones, como indica [rpubs](http://rpubs.com/ydmarinb/429756). Las expresiones regulares se construyen utilizando los operadores **unión, concatenación y clausura de Kleene**.
+
+## Página web 2
+
+La explicación de qué son las **expresiones regulares** es muy parecida según [ub.edu](http://www.ub.edu/stat/docencia/Cursos-R/Radvanced/materials/CadenasenR.pdf), según esta página web también suelen llamarse _regex_ o _regexp_ pues es una abreviación. Se trata de un lenguaje para poder definir exactamente lo que queremos buscar o reemplazar.
+
+A diferencia de otros lenguajes, en los que las **expresiones regulares** se encierran entre algun tipo especial de delimitadores (por ejemplo entre “/”) en una **expresión regular** se representa como una cadena de texto. Existen tres tipos de **expresiones regulares**:
+
+1. Expresiones regulares POSIX extendidas
+1. Expresiones regulares básicas
+1. Expresiones regulares de Perlu
+
+# MARKDOWN
+
+## Página web 1
+
+[guides.github](https://guides.github.com/features/mastering-markdown/) define **markdown** como una forma de diseñar texto en la web. Pudiendo controla la visualización del documento, formatear palabras en negrita o cursiva, agregar imágenes y crear listas todo ello son solo algunas de las cosas que podemos hacer con **markdown**. Principalmente, Markdown es solo texto normal con algunos caracteres no alfabéticos, como *"#"* ó  "*" .
+
+## Página web 2
+
+**Markdown** es un lenguaje de marcado ligero que puede usar para agregar elementos de formato a documentos de texto sin formato. Como bien define [markdownguide](https://www.markdownguide.org/getting-started/), **markdown** fue creado por *John Gruber* en 2004, **markdown** es ahora uno de los lenguajes de marcado más populares del mundo.
+
+Usar Markdown es diferente de usar un editor _WYSIWYG_ . En una aplicación como Microsoft Word, hace clic en los botones para formatear palabras y frases, y los cambios son visibles de inmediato. **Markdown** no es así. Cuando crea un archivo con formato **Markdown**, agrega la sintaxis de **Markdown** al texto para indicar qué palabras y frases deben tener un aspecto diferente.
+
+# ANÁLISIS DE DATOS
+
+## Sobre USAArrest
+
+En este apartado se va a realizar un análisis de los **arrestos en Estados Unidos**, para ello en primer lugar vamos a observar que variables contiene este conjunto de datos de R. 
+
+```{r results= "oasis", echo=FALSE}
+library(knitr)
+kable(USArrests[1:5,])             
+
+```
+
+Gracias a esta visualización en tabla de los datos podemos observar claramente que variables contiene: 
+
+* **Murder**: indica el número arrestos por asesinato (por 100.000 habitantes) en cada uno de los estados.
+
+* **Assault**: indica el número de arrestos por asalto (por 100.000 habitantes) en cada uno de los estados.
+
+* **UrbanPop**: indica el porcentaje de población que viven en zonas urbanas en cada estado.
+
+* **Rape**: indica el número de arrestos por violación (por 100.000 habitantes) en cada uno de los estados.
+
+Para poder realizar facetas y entender un poco mejor los datos, añadiremos a nuestra base de datos las columnas **estados** y **zonas**, veamos a continuación como quedarían los datos finalmente (en negrita las dos nuevas columnas):
+
+* **Estados**: nombres de todos los estados de USA.
+
+* **Regiones**: indica la región a la que pertenece cada estado.
+
+```{r results= "oasis", echo=FALSE}
+tabla<- USArrests
+tabla$Estados<-state.name
+tabla$Regiones<-state.region
+
+library(knitr)
+library(kableExtra)
+kable(tabla[1:5,],) %>%
+  kable_styling("striped", "responsive") %>%
+  column_spec(6:7, bold=T)
+
+```
+
+
+## Representación Gráfica
+
+Este conjunto de datos, como hemos podido observar, contiene las variables de los arrestos por cada 100.000 habitantes por **asesinato**, **asalto** y **violación** en cada uno de los 50 estados de Estados Unidos en 1973. Tmabién se observa la variable UrbanPop que indica qué porcentaje de la población vive en **zonas urbanas**.
+
+> **x=UrbanPop, y=Rape**
+
+A contunuación vamos a observar si existe relación entre el porcentaje de población que vive en zonas urbanas y los arrestos por violación según cada **Región**.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+ggplot(tabla, aes(x = UrbanPop, y = Rape, color=Regiones)) + geom_point()+ geom_smooth() +facet_wrap(~ Regiones)+ theme(
+  panel.background = element_rect(fill = "white", colour = "grey50"),
+  legend.position = "top", legend.key = element_rect(fill = "white", colour = "grey"), axis.line = element_line(size = 2, colour = "grey80"))
+```
+
+Podemos concluir que existe una relación positiva entre el porcentaje de población urbana y los arrestos por violación en regiones como el Sur o el Este, es decir, a medida que la población de estos estados se concentra en zonas urbanas, el número de arrestos por violación en esa zona es mayor. En cambio, no podemos concluir lo mismo para las regiones de América Central y América del este, pues no se evidencia una clara relación.
+
+> **x=UrbanPop, y=Assault**
+  
+  En el siguiente gráfico observamos si existe una cierta relación entre el porcentaje de población urbana y los arrestos por asalto en cada **Región**.
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+ggplot(tabla, aes(x = UrbanPop, y = Assault, color=Regiones)) + geom_point() + geom_smooth() +facet_wrap(~ Regiones)+ theme(
+  panel.background = element_rect(fill = "white", colour = "grey50"),
+  legend.position = "top", legend.key = element_rect(fill = "white", colour = "grey"), axis.line = element_line(size = 2, colour = "grey80"))
+```
+
+En este caso, podemos concluir que en todos las regiones existe una relación positiva entre los arretos por asesinato y el porcentaje de población urbana en los estados que componen cada región.
+
+## Conclusión
+
+Podemos concluir que existe una relación positiva entre el porcentaje de población urbana y los arrestos tanto por violación como por asalto en la mayoría de las regiones de Estados Unidos. Fuera de esta conclusión quedan las regiones de América Central y América del Este en el caso de relacionar las violaciones con el porcentaje de población urbana, en la priemera se mantienen constantes las violaciones a lo largo de los distintos porcentajes de población urbana, en la segunda región, en cambio, se evidencia un ligero descenso de las violaciones cuanta más población urbana exista. 
+
+
